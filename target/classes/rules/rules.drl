@@ -1,0 +1,205 @@
+import org.regsys.regbook.UserResponse
+import org.regsys.regbook.AskQuestion
+
+rule "pytanie-niebezpieczenstwo-tak"
+when
+    $response: UserResponse(isWantDanger())
+then
+    $response.setAnswer(AskQuestion.ask("Czy w fabule występuje mroczna atmosfera?"));
+    boolean wantDarkAtmosphere = $response.getAnswer().equalsIgnoreCase("tak");
+
+    modify($response){
+        setWantDarkAtmosphere(wantDarkAtmosphere)
+    }
+end
+
+rule "pytanie-mroczna-atmosfera-tak"
+when
+    $response: UserResponse(isWantDanger(), isWantDarkAtmosphere())
+then
+    $response.setAnswer(AskQuestion.ask("Czy w fabule wystepują morderstwa?"));
+    boolean wantMurders = $response.getAnswer().equalsIgnoreCase("tak");
+
+    modify($response){
+        setWantMurders(wantMurders)
+    }
+end
+
+rule "pytanie-mroczna-atmosfera-nie"
+when
+    $response: UserResponse(isWantDanger(), !isWantDarkAtmosphere())
+then
+    $response.setAnswer(AskQuestion.ask("Czy w fabule występuje konflikt między dobrem a złem?"));
+    boolean wantConflict = $response.getAnswer().equalsIgnoreCase("tak");
+    modify($response){
+        setWantConflictBetweenGoodAndEvil(wantConflict)
+    }
+end
+
+rule "wybor-konflikt-dobro-zlo-tak"
+when
+    UserResponse(isWantDanger(), !isWantDarkAtmosphere(), isWantConflictBetweenGoodAndEvil())
+then
+    System.out.println("Wybrany gatunek: Fantasy!");
+end
+
+rule "wybor-konflikt-dobro-zlo-nie"
+when
+    UserResponse(isWantDanger(), !isWantDarkAtmosphere(), !isWantConflictBetweenGoodAndEvil())
+then
+    System.out.println("Wybrany gatunek: Literatura podróżnicza!");
+end
+
+rule "pytanie-morderstwa-tak"
+when
+    $response: UserResponse(isWantDanger(), isWantDarkAtmosphere(), isWantMurders())
+then
+    $response.setAnswer(AskQuestion.ask("Czy w fabule wystepują detektywistyczne techniki?"));
+    boolean wantDetectiveTech = $response.getAnswer().equalsIgnoreCase("tak");
+
+    modify($response){
+        setWantDetectiveTechniques(wantDetectiveTech)
+    }
+end
+
+rule "wybor-morderstwa-nie"
+when
+    $response: UserResponse(isWantDanger(), isWantDarkAtmosphere(), !isWantMurders())
+then
+    System.out.println("Wybrany gatunek: Science-Fiction");
+end
+
+rule "pytanie-detektywistyczne-techniki-tak"
+when
+    $response: UserResponse(isWantDanger(), isWantDarkAtmosphere(), isWantMurders(), isWantDetectiveTechniques())
+then
+    $response.setAnswer(AskQuestion.ask("Czy w fabule wystepują elementy grozy?"));
+    boolean wantElementsOfHorror = $response.getAnswer().equalsIgnoreCase("tak");
+
+    modify($response){
+        setWantElementsOfHorror(wantElementsOfHorror)
+    }
+end
+
+rule "wybor-detektywistyczne-techniki-nie"
+when
+    $response: UserResponse(isWantDanger(), isWantDarkAtmosphere(), isWantMurders(), !isWantDetectiveTechniques())
+then
+    System.out.println("Wybrany gatunek: Horror");
+end
+
+rule "wybor-elementy-grozy-tak"
+when
+    $response: UserResponse(isWantDanger(), isWantDarkAtmosphere(), isWantMurders(), isWantDetectiveTechniques(), isWantElementsOfHorror())
+then
+    System.out.println("Wybrany gatunek: Thriller");
+end
+
+rule "wybor-elementy-grozy-nie"
+when
+    $response: UserResponse(isWantDanger(), isWantDarkAtmosphere(), isWantMurders(), isWantDetectiveTechniques(), !isWantElementsOfHorror())
+then
+    System.out.println("Wybrany gatunek: Powieść kryminalna");
+end
+
+rule "pytanie-niebezpieczenstwo-nie"
+when
+    $response: UserResponse(!isWantDanger())
+then
+    $response.setAnswer(AskQuestion.ask("Czy w fabule występuje rozterki emocjonalne bohaterów?"));
+    boolean wantEmotionalDilemmas = $response.getAnswer().equalsIgnoreCase("tak");
+
+    modify($response){
+        setWantEmotionalDilemmas(wantEmotionalDilemmas)
+    }
+end
+
+rule "pytanie-rozterki-emocjonalne-tak"
+when
+    $response: UserResponse(!isWantDanger(), isWantEmotionalDilemmas())
+then
+    $response.setAnswer(AskQuestion.ask("Czy w fabule występuje romantyczna atmosfera?"));
+    boolean wantRomanticAtmosphere = $response.getAnswer().equalsIgnoreCase("tak");
+
+    modify($response){
+        setWantRomanticAtmosphere(wantRomanticAtmosphere)
+    }
+end
+
+rule "wybor-romantyczna-atmosfera-tak"
+when
+    $response: UserResponse(!isWantDanger(), isWantEmotionalDilemmas(), isWantRomanticAtmosphere())
+then
+    System.out.println("Wybrany gatunek: Romans");
+end
+
+rule "wybor-romantyczna-atmosfera-nie"
+when
+    $response: UserResponse(!isWantDanger(), isWantEmotionalDilemmas(), !isWantRomanticAtmosphere())
+then
+    System.out.println("Wybrany gatunek: Dramat");
+end
+
+rule "pytanie-rozterki-emocjonalne-nie"
+when
+    $response: UserResponse(!isWantDanger(), !isWantEmotionalDilemmas())
+then
+    $response.setAnswer(AskQuestion.ask("Czy w fabule występuje symbolika?"));
+    boolean wantSymbolism = $response.getAnswer().equalsIgnoreCase("tak");
+
+    modify($response){
+        setWantSymbolism(wantSymbolism)
+    }
+end
+
+rule "pytanie-symbolika-tak"
+when
+    $response: UserResponse(!isWantDanger(), !isWantEmotionalDilemmas(), isWantSymbolism())
+then
+    $response.setAnswer(AskQuestion.ask("Czy fabuła kończy się szczęśliwie dla boahterów?"));
+    boolean wantHappiness = $response.getAnswer().equalsIgnoreCase("tak");
+
+    modify($response){
+        setWantHappiness(wantHappiness)
+    }
+end
+
+rule "wybor-szczescie-tak"
+when
+    $response: UserResponse(!isWantDanger(), !isWantRomanticAtmosphere(), isWantSymbolism(), isWantHappiness())
+then
+    System.out.println("Wybrany gatunek: Literatura dziecięca");
+end
+
+rule "wybor-szczescie-nie"
+when
+    $response: UserResponse(!isWantDanger(), !isWantRomanticAtmosphere(), isWantSymbolism(), !isWantHappiness())
+then
+    System.out.println("Wybrany gatunek: Powieść historyczna");
+end
+
+rule "pytanie-symbolika-nie"
+when
+    $response: UserResponse(!isWantDanger(), !isWantEmotionalDilemmas(), !isWantSymbolism())
+then
+    $response.setAnswer(AskQuestion.ask("Czy książka zawiera rzetelne informacje?"));
+    boolean wantReliableInformation = $response.getAnswer().equalsIgnoreCase("tak");
+
+    modify($response){
+        setWantReliableInformation(wantReliableInformation)
+    }
+end
+
+rule "wybor-rzetelne-informacje-tak"
+when
+    $response: UserResponse(!isWantDanger(), !isWantEmotionalDilemmas(), !isWantRomanticAtmosphere(), !isWantSymbolism(), isWantReliableInformation())
+then
+    System.out.println("Wybrany gatunek: Literatura faktu");
+end
+
+rule "wybor-rzetelne-informacje-nie"
+when
+    $response: UserResponse(!isWantDanger(), !isWantEmotionalDilemmas(), !isWantRomanticAtmosphere(), !isWantSymbolism(), !isWantReliableInformation())
+then
+    System.out.println("Wybrany gatunek: Komedia");
+end
